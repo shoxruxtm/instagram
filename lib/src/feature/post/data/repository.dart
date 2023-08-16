@@ -5,7 +5,8 @@ import '../../../common/service/api_service.dart';
 import '../model/photo_model.dart';
 
 abstract interface class IPostRepository {
-  const IPostRepository();
+
+  Future<List<PhotoModel>> paginationPhotos(int page);
 
   Future<List<PhotoModel>> getPhotos();
 }
@@ -27,4 +28,20 @@ class PostRepositoryImpl extends IPostRepository {
             .toList();
     return photos;
   }
+
+  @override
+  Future<List<PhotoModel>> paginationPhotos(int page) async {
+    String response = await apiService.request(
+      ApiConst.photosPath,
+      headers: {"Authorization": "Client-ID ${ApiConst.apiKey}"},
+      queryParametersAll: ApiConst.paginationQuery(20, page),
+    );
+
+    List<PhotoModel> photos = List<Map<String, Object?>>.from(
+      jsonDecode(response),
+    ).map(PhotoModel.fromJson).toList();
+
+    return photos;
+  }
+
 }

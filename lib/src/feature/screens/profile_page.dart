@@ -18,17 +18,47 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   List<PhotoModel> photos = [];
   late final IPostRepository photoRepository;
+  late final TextEditingController controller;
+  late final ScrollController scrollController;
+  int page = 1;
+  bool isLoading = false;
+  bool isPaginationLoading = false;
 
   @override
   void initState() {
     super.initState();
     photoRepository = PostRepositoryImpl(APIService());
+    controller = TextEditingController();
+    scrollController = ScrollController()..addListener(pagination);
     getAllPhotos();
   }
 
+  @override
+  void dispose() {
+    controller.dispose();
+    scrollController.removeListener(pagination);
+    scrollController.dispose();
+    super.dispose();
+  }
+
   Future<void> getAllPhotos() async {
-    photos = await photoRepository.getPhotos();
-    setState(() {});
+    setState(() {
+      isLoading = true;
+    });
+    photos = await photoRepository.paginationPhotos(page++);
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  void pagination() async {
+    if (scrollController.position.pixels ==
+        scrollController.position.maxScrollExtent) {
+      List<PhotoModel> paginationPhoto =
+          await photoRepository.paginationPhotos(page++);
+      photos.addAll(paginationPhoto);
+      setState(() {});
+    }
   }
 
   @override
@@ -42,8 +72,8 @@ class _ProfilePageState extends State<ProfilePage> {
         elevation: 0,
         title: Row(
           children: [
-            Text(photos.isNotEmpty?
-              photos[1].user!.username.toString():"",
+            Text(
+              photos.isNotEmpty ? photos[1].user!.username.toString() : "",
               style: TextStyle(
                 color: Colors.black,
               ),
@@ -100,8 +130,9 @@ class _ProfilePageState extends State<ProfilePage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       CustomCircleAvatar(
-                        image: NetworkImage(photos.isNotEmpty?
-                            "${photos[1].user?.profileImage?.medium}":""),
+                        image: NetworkImage(photos.isNotEmpty
+                            ? "${photos[1].user?.profileImage?.medium}"
+                            : ""),
                         radius: 40,
                       ),
                       Column(
@@ -160,8 +191,8 @@ class _ProfilePageState extends State<ProfilePage> {
                   const SizedBox(
                     height: 7,
                   ),
-                   Text(photos.isNotEmpty?
-                    "${photos[1].user?.firstName}":"",
+                  Text(
+                    photos.isNotEmpty ? "${photos[1].user?.firstName}" : "",
                     style: TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.w600,
@@ -271,7 +302,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     height: 10,
                   ),
                   SizedBox(
-                    height: 85,
+                    height: 80,
                     child: ListView.separated(
                       separatorBuilder: (context, index) => SizedBox(
                         width: 10,
@@ -279,8 +310,10 @@ class _ProfilePageState extends State<ProfilePage> {
                       itemCount: photos.length,
                       scrollDirection: Axis.horizontal,
                       itemBuilder: (context, index) => CustomCircleAvatar(
-                        image: NetworkImage(photos.isNotEmpty?
-                            "${photos[index].user?.profileImage?.large}":""),
+                        isBorder: false,
+                        image: NetworkImage(photos.isNotEmpty
+                            ? "${photos[index].user?.profileImage?.large}"
+                            : ""),
                         radius: 35,
                       ),
                     ),
@@ -290,7 +323,7 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
             Column(
               children: [
-               CustomTabBar(),
+                CustomTabBar(),
                 SizedBox(
                   height: 630,
                   child: TabBarView(
@@ -299,36 +332,51 @@ class _ProfilePageState extends State<ProfilePage> {
                         mainAxisSpacing: 2,
                         crossAxisSpacing: 2,
                         crossAxisCount: 3,
-                        children:List.generate(
-                            photos.length,
-                                (e) => Image(
-                              image: NetworkImage(photos.isNotEmpty?
-                                  "${photos[e].user?.profileImage?.large}":""),
-                            ),),
+                        controller: scrollController,
+                        children: List.generate(
+                          photos.length,
+                          (e) => Image(
+                            fit: BoxFit.fill,
+                            width: double.infinity,
+                            height: double.infinity,
+                            image: NetworkImage(photos.isNotEmpty
+                                ? "${photos[e].urls?.regular}"
+                                : ""),
+                          ),
+                        ),
                       ),
                       GridView.count(
                         mainAxisSpacing: 2,
                         crossAxisSpacing: 2,
                         childAspectRatio: 1 / 1.5,
                         crossAxisCount: 3,
+                        controller: scrollController,
                         children: List.generate(
-                            photos.length,
-                                (e) => Image(
-                                  fit: BoxFit.cover,
-                              image: NetworkImage(photos.isNotEmpty?
-                                  "${photos[e].user?.profileImage?.large}":""),
-                            ),),
+                          photos.length,
+                          (e) => Image(
+                            fit: BoxFit.cover,
+                            image: NetworkImage(photos.isNotEmpty
+                                ? "${photos[e].urls?.regular}"
+                                : ""),
+                          ),
+                        ),
                       ),
                       GridView.count(
                         mainAxisSpacing: 2,
                         crossAxisSpacing: 2,
                         crossAxisCount: 3,
+                        controller: scrollController,
                         children: List.generate(
-                            photos.length,
-                            (e) => Image(
-                                  image: NetworkImage(photos.isNotEmpty?
-                                      "${photos[e].user?.profileImage?.large}":""),
-                                ),),
+                          photos.length,
+                          (e) => Image(
+                            fit: BoxFit.fill,
+                            width: double.infinity,
+                            height: double.infinity,
+                            image: NetworkImage(photos.isNotEmpty
+                                ? "${photos[e].urls?.regular}"
+                                : ""),
+                          ),
+                        ),
                       ),
                     ],
                   ),

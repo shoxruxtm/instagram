@@ -15,7 +15,7 @@ abstract final class ApiConst {
     "q": [searchText],
   };
 
-  static Map<String, List<String>> paginationParams(int limit, int page) => {
+  static Map<String, List<String>> paginationQuery(int limit, int page) => {
     "per_page": ["$limit"],
     "page": ["$page"],
   };

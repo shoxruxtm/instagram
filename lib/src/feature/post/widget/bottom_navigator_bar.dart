@@ -32,11 +32,18 @@ class CustomNavigatorBar extends StatelessWidget {
           label: "",
         ),
         BottomNavigationBarItem(
-          icon: Icon(CupertinoIcons.videocam_fill),
+          icon: Icon(CupertinoIcons.plus_app),
           label: "",
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.shop),
+          icon: Image(
+            color: Colors.black54,
+            height: 30,
+            width: 30,
+            image: AssetImage(
+              "images/Icons (5).png",
+            ),
+          ),
           label: "",
         ),
         BottomNavigationBarItem(

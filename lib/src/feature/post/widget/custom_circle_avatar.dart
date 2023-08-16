@@ -17,7 +17,7 @@ class CustomCircleAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox.square(
-      dimension: isBorder ? radius! * 2 + 15 : radius! * 2 + 4,
+      dimension: isBorder ? radius! * 2 + 15 : radius! * 2 + 10,
       child: DecoratedBox(
         decoration: isBorder
             ? BoxDecoration(
@@ -27,7 +27,7 @@ class CustomCircleAvatar extends StatelessWidget {
               )
             : BoxDecoration(
                 borderRadius: const BorderRadius.all(Radius.circular(100)),
-                border: Border.all(color: Colors.white, width: 2.5,),
+                border: Border.all(color: Colors.black12, width: 2.5,),
               ),
         child: Stack(
           children: [
